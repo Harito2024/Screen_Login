@@ -1,12 +1,13 @@
-import { authCheckStatus, authLogin } from "@/core/actions/auth-actions"
-import { User } from "@/core/auth/interface/user"
-import { create } from 'zustand'
-
+import { authCheckStatus, authLogin } from "@/core/actions/auth-actions";
+import { User } from "@/core/auth/interface/user";
+import { SecureStorageAdapter } from '@/helpers/adapters/secure-storage.adapter';
+import { create } from 'zustand';
 
 export type AuthStatus= 'authenticadted' | 'unauthenticadted' | 'checking'
 
 
 export interface AuthState{
+    changeStatus(token: string | undefined, user: User | undefined): boolean | PromiseLike<boolean>;
     status: AuthStatus,
     token?: string,
     user?: User
@@ -17,52 +18,46 @@ export interface AuthState{
 }
 
 
-export const useAuthStore = create <AuthState>()( (set) =>({
+export const useAuthStore = create <AuthState>()( (set, get) =>({
+    //Propertis
 status: 'checking',
 token:undefined,
 user:undefined,
 
-login: async (email:string, password: string) =>{
 
-    const resp = await authLogin(email, password)
-
-    if(!resp){
-        set({status: 'unauthenticadted', token: undefined, user: undefined})
-        return false
+// Actions
+  changeStatus: async (token?: string, user?: User) => {
+    if (!token || !user) {
+      set({ status: 'unauthenticadted', token: undefined, user: undefined });
+      await SecureStorageAdapter.deleteItem('token');
+      return false;
     }
 
     set({
-        status: 'authenticadted',
-        token: resp.token,
-        user: resp.user
-    })
+      status: 'authenticadted',
+      token: token,
+      user: user,
+    });
 
-    //TODO: guardar el token en el secure storage
+    await SecureStorageAdapter.setItem('token', token);
 
-    return true
-},
+    return true;
+  },
 
-checkStatus: async ()=>{
-    const resp = await authCheckStatus()
+  login: async (email: string, password: string) => {
+    const resp = await authLogin(email, password);
+    return get().changeStatus(resp?.token, resp?.user);
+  },
 
-    if(!resp){
-        set({status: 'unauthenticadted', token: undefined, user: undefined})
-return
-    }
+  checkStatus: async () => {
+    const resp = await authCheckStatus();
+    get().changeStatus(resp?.token, resp?.user);
+  },
 
-    set({
-        status: 'authenticadted',
-        token: resp.token,
-        user: resp.user
-    })
+  logout: async () => {
+    SecureStorageAdapter.deleteItem('token');
 
-    return
-},
-
-logout: async()=>{
-//TODO clear token del secure storage
-set({ status: 'unauthenticadted', token:undefined, user: undefined})
-}
-}))
-
+    set({ status: 'unauthenticadted', token: undefined, user: undefined });
+  },
+}));
 
