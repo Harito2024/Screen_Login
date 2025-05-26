@@ -13,13 +13,15 @@ import { useColorScheme } from "@/presentation/theme/hooks/useColorScheme";
 import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const backgroundColor = useThemeColor({}, "background");
 
   const [loaded] = useFonts({
-    //SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    // SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     KanitRegular: require("../assets/fonts/Kanit-Regular.ttf"),
     KanitBold: require("../assets/fonts/Kanit-Bold.ttf"),
     KanitThin: require("../assets/fonts/Kanit-Thin.ttf"),
@@ -32,7 +34,6 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!loaded) {
-    // Async font loading only occurs in development.
     return null;
   }
 

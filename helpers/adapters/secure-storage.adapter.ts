@@ -29,3 +29,18 @@ export class SecureStorageAdapter{
         }
     }
 }
+
+
+
+
+
+
+
+
+/* # EXPO_PUBLIC_STAGE=dev
+
+# EXPO_PUBLIC_API_URL=http://172.21.144.1:3000/api
+#EXPO_PUBLIC_API_URL_IOS=http://localhost:3000/api
+#EXPO_PUBLIC_API_URL_ANDROID=http://172.21.144.1:3000/api  
+  
+ */
